@@ -1,0 +1,240 @@
+basePath: /
+definitions:
+  booking.AvailableFilter:
+    properties:
+      checkInDate:
+        type: string
+      checkOutDate:
+        type: string
+      hotelID:
+        type: string
+    type: object
+  booking.BookingStatus:
+    enum:
+    - init
+    - process_payment
+    - success_payment
+    - cancel
+    - pending_payment
+    type: string
+    x-enum-varnames:
+    - StatusInit
+    - StatusProcessPayment
+    - StatusSuccessPayment
+    - StatusCancel
+    - StatusPendingPayment
+  booking.Dto:
+    properties:
+      checkInDate:
+        type: string
+      checkOutDate:
+        type: string
+      description:
+        type: string
+      hotelID:
+        type: string
+      id:
+        description: rule base = hotelID checkInDate + checkOutDate + roomID for idempotent
+        type: string
+      roomId:
+        type: integer
+      status:
+        $ref: '#/definitions/booking.BookingStatus'
+    type: object
+  create_booking.CreateBookingRequest:
+    properties:
+      checkInDate:
+        type: string
+      checkOutDate:
+        type: string
+      description:
+        type: string
+      hotelID:
+        type: string
+      roomTypeId:
+        type: integer
+    type: object
+  hotel.Hotel:
+    properties:
+      createDate:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      location:
+        type: string
+      name:
+        type: string
+      updateDate:
+        type: string
+    type: object
+  hotel.Room:
+    properties:
+      createDate:
+        type: string
+      description:
+        type: string
+      hotelID:
+        description: Composite key part 1
+        type: string
+      price:
+        type: number
+      roomID:
+        description: Composite key part 2
+        type: integer
+      roomType:
+        type: integer
+      updateDate:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: This is payment API
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Payment API
+  version: "1.0"
+paths:
+  /booking/:
+    post:
+      consumes:
+      - application/json
+      description: create a booking
+      parameters:
+      - description: Booking information
+        in: body
+        name: booking
+        required: true
+        schema:
+          $ref: '#/definitions/create_booking.CreateBookingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/booking.Dto'
+      summary: create a booking
+      tags:
+      - booking
+  /booking/:bookingId:
+    get:
+      description: Get booking by id
+      parameters:
+      - description: Booking ID
+        in: path
+        name: bookingId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/booking.Dto'
+      summary: Get booking by id
+      tags:
+      - booking
+  /booking/:hotelId:
+    get:
+      description: Get all bookings
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/booking.Dto'
+      summary: Get all bookings
+      tags:
+      - booking
+  /booking/available:
+    post:
+      consumes:
+      - application/json
+      description: Get available room
+      parameters:
+      - description: Filter information
+        in: body
+        name: filter
+        required: true
+        schema:
+          $ref: '#/definitions/booking.AvailableFilter'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      summary: Get available room
+      tags:
+      - booking
+  /hotels/:
+    get:
+      consumes:
+      - application/json
+      description: Get all hotels
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/hotel.Hotel'
+            type: array
+      summary: Get all hotels
+      tags:
+      - hotels
+  /hotels/{hotelId}/rooms:
+    get:
+      consumes:
+      - application/json
+      description: Get room by hotel id
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: hotelId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/hotel.Room'
+            type: array
+      summary: Get room by hotel id
+      tags:
+      - hotels
+  /hotels/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get hotel by id
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/hotel.Hotel'
+      summary: Get hotel by id
+      tags:
+      - hotels
+swagger: "2.0"
